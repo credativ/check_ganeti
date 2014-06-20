@@ -63,7 +63,7 @@ my $url = sprintf( 'https://%s:%d/', $np->opts->hostname, $np->opts->port );
 
 my $ua = new LWP::UserAgent;
 $ua->default_header( 'Accept' => 'application/json' );
-$ua->ssl_opts( verify_hostname => 0 );
+$ua->ssl_opts( verify_hostname => 0, SSL_verify_mode => 0 );
 
 # get general information about the cluster
 
