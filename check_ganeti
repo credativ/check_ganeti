@@ -116,14 +116,23 @@ foreach my $instance (@$data) {
     my $name        = $instance->{'name'};
     my $admin_state = $instance->{'admin_state'};
     my $status      = $instance->{'status'};
-    if (
-        !(
-               ( $status eq 'running' and $admin_state eq 'up' )
-            || ( $status eq 'ADMIN_down' and $admin_state eq 'down' )
-        )
-      )
-    {
-        $np->add_message( 'CRITICAL',
+
+    if ( $admin_state eq 'up' ) {
+        if ( $status ne 'running' ) {
+            $np->add_message( 'CRITICAL',
+                "Instance $name is $status, but admin set $admin_state" );
+        }
+    }
+
+    elsif ( $admin_state eq 'down' ) {
+        if ( $status ne 'ADMIN_down' ) {
+            $np->add_message( 'CRITICAL',
+                "Instance $name is $status, but admin set $admin_state" );
+        }
+    }
+
+    else {
+        $np->add_message( 'UNKNOWN',
             "Instance $name is $status, but admin set $admin_state" );
     }
 }
