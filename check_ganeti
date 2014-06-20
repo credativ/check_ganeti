@@ -118,7 +118,14 @@ foreach my $instance (@$data) {
     my $status      = $instance->{'status'};
 
     if ( $admin_state eq 'up' ) {
-        if ( $status ne 'running' ) {
+        if ( $status eq 'running' ) {
+            # OK
+        }
+        elsif ( $status eq 'ERROR_wrongnode' ) {
+            $np->add_message( 'WARNING',
+                "Instance $name is $status, but admin set $admin_state" );
+        }
+        else {
             $np->add_message( 'CRITICAL',
                 "Instance $name is $status, but admin set $admin_state" );
         }
