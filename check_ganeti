@@ -36,10 +36,10 @@ use Nagios::Plugin;
 use Date::Parse;
 
 my $np = Nagios::Plugin->new(
-    usage => "Usage: %s [ -H|--hostname=<hostname>] " . "[ -p|--port=<port> ]",
+    usage => "Usage: %s [ -H|--hostname=<hostname>] " . "[ -p|--port=<port> ] " . "[ -U|--username=<username> ] " . "[ -P|--password=<password> ]",
     shortname => 'Check Ganeti cluster health',
     url       => 'https://github.com/credativ/check_ganeti',
-    version   => '0.1',
+    version   => '0.2',
     license   => 'This plugin is free software, and comes with ABSOLUTELY
 NO WARRANTY. It may be used, redistributed and/or modified under
 the terms of the BSD 3-clause license.',
@@ -57,6 +57,24 @@ $np->add_arg(
     default => 5080,
 );
 
+$np->add_arg(
+    spec    => 'username|U=s',
+    help    => 'Username for basic authentication',
+    default => undef,
+);
+
+$np->add_arg(
+    spec    => 'password|P=s',
+    help    => 'Password for basic authentication',
+    default => undef,
+);
+
+$np->add_arg(
+    spec    => 'realm|R=s',
+    help    => 'Realm for basic authentication (default: "%s")',
+    default => 'Ganeti Remote API',
+);
+
 $np->getopts;
 
 my $url = sprintf( 'https://%s:%d/', $np->opts->hostname, $np->opts->port );
@@ -64,6 +82,14 @@ my $url = sprintf( 'https://%s:%d/', $np->opts->hostname, $np->opts->port );
 my $ua = new LWP::UserAgent;
 $ua->default_header( 'Accept' => 'application/json' );
 $ua->ssl_opts( verify_hostname => 0, SSL_verify_mode => 0 );
+if ($np->opts->username && $np->opts->password) {
+    $ua->credentials(
+        $np->opts->hostname . ':' . $np->opts->port,
+        $np->opts->realm,
+        $np->opts->username,
+        $np->opts->password
+    );
+}
 
 # get general information about the cluster
 
